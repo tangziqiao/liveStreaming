@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>HOME PAGE</title>
+  <meta charset='utf-8'>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+ integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+ crossorigin=""/>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style> #mapid {
+    height: 250px;
+    width: 400px;
+    margin-top: 100px;
+    margin-right: 100px;
+    margin-left: 300px;
+    z-index:1;
+
+  }</style>
+
+  <style type="text/css">
+  #stream {
+    /*height: 50%;*/
+    z-index:10;
+    height: 450px;
+    width: 400px;
+    /*display: block;*/
+    margin-top: -130px;
+    margin-right: 300px;
+    margin-left: 720px;
+    margin-bottom: 200px;
+    position: fixed;
+  }
+  </style>
+
+</head>
+
+<body>
+  <div id="mapid"></div>
+
+  <<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <script>
+  $( function() {
+    $( "#mapid" ).draggable();
+  } );
+  </script>
+
+  <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+crossorigin=""></script>
+
+  <img src="" id="stream">
+
+  <script>
+  $( function() {
+    $( "#stream" ).draggable();
+  } );
+  </script>
+
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+  var socket = io();
+  var stream = document.querySelector('#stream');
+
+  function makeMap(location){
+
+    var map = L.map('mapid').setView([location.latitude, location.longtitude], 18);
+
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+        maxZoom: 20,
+        id: 'mapbox.satellite',
+        accessToken: 'pk.eyJ1IjoienRhbmcxIiwiYSI6ImNqYWxqM3NmazJ0aDIyd28yaWhkYXN2ZncifQ.oKa_GOd1-yB99apaPjFxVA'
+    }).addTo(map);
+
+    map.dragging.disable()
+    $(".leaflet-control-zoom").css("visibility", "hidden");
+
+  }
+
+  socket.emit('start-stream');
+
+  socket.on('liveStream', function(url) {
+    // console.log(url);
+    stream.src = url;
+  });
+
+  socket.on('location', function(loc) {
+    // console.log(url);
+    // stream.src = loc;
+    console.log(loc);
+    makeMap(loc);
+  });
+  </script>
+</body>
+
+</html>
