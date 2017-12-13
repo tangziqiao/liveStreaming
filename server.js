@@ -10,8 +10,6 @@ var proc;
 var curl;
 
 app.use('/', express.static(path.join(__dirname, 'stream')));
-
-
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html');
 });
@@ -29,21 +27,17 @@ io.on('connection', function(socket) {
     socket.emit('location',{
       latitude: Number(info.loc.split(',')[0]),
       longtitude: Number(info.loc.split(',')[1])
-    })
-
-  })
+    });
+  });
 
   socket.on('disconnect', function() {
     delete sockets[socket.id];
-
-    // no more sockets, kill the stream
     stopStreaming();
   });
 
   socket.on('start-stream', function() {
     startStreaming(io);
   });
-
 });
 
 http.listen(3000, function() {
